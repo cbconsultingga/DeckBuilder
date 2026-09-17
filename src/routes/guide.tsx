@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
-import { magnetUnlocked, newId, saveLead, unlockMagnet } from "@/lib/leads";
+import { captureLead } from "@/lib/lead-capture";
+import { magnetUnlocked, unlockMagnet } from "@/lib/leads";
 import { SERVICE_CITIES } from "@/lib/site";
 
 export const Route = createFileRoute("/guide")({
@@ -24,46 +25,48 @@ function Guide() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [zip, setZip] = useState("");
+  const [contactConsent, setContactConsent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setOpen(magnetUnlocked());
   }, []);
 
-  function gate(e: FormEvent) {
+  async function gate(e: FormEvent) {
     e.preventDefault();
-    saveLead({
-      id: newId(),
-      createdAt: new Date().toISOString(),
-      name,
-      email,
-      phone: "",
-      zip,
-      homeowner: true,
-      jobType: "Cost brief",
-      size: "",
-      height: "",
-      budget: "",
-      timeline: "Brief download",
-      source: "Lead magnet",
-      notes: "",
-      qualified: false,
-      magnet: true,
-    });
-    unlockMagnet();
-    setOpen(true);
+    setBusy(true);
+    setError(null);
+    try {
+      await captureLead({
+        data: {
+          kind: "magnet",
+          name,
+          email,
+          zip,
+          contactConsent,
+          source: "Lead magnet",
+          timeline: "Brief download",
+        },
+      });
+      unlockMagnet();
+      setOpen(true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Please try again in a moment.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   if (!open) {
     return (
       <main className="mx-auto max-w-lg px-4 py-16 sm:px-6">
         <p className="text-xs tracking-[0.18em] text-cedar uppercase">Lead magnet</p>
-        <h1 className="mt-3 font-display text-4xl sm:text-5xl">
-          The 2026 Deck Rebuild Brief.
-        </h1>
+        <h1 className="mt-3 font-display text-4xl sm:text-5xl">The 2026 Deck Rebuild Brief.</h1>
         <p className="mt-4 text-muted-foreground">
-          What homeowners in Bethlehem and 25 miles of 30620 actually pay. Three
-          questions that kill a bad bid. When stain is a stall. Drop your name
-          and we open the brief on this page — no PDF circus.
+          What homeowners in Bethlehem and 25 miles of 30620 actually pay. Three questions that kill
+          a bad bid. When stain is a stall. Drop your name and we open the brief on this page — no
+          PDF circus.
         </p>
         <form onSubmit={gate} className="mt-8 space-y-4 rounded-xl bg-card p-6 shadow-border">
           <div className="space-y-2">
@@ -90,12 +93,29 @@ function Guide() {
               required
             />
           </div>
-          <Button type="submit" className="w-full">
-            Open the brief
+          <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={contactConsent}
+              onChange={(event) => setContactConsent(event.target.checked)}
+              className="mt-1 size-4 shrink-0 accent-cedar"
+              required
+            />
+            <span>
+              I agree that Jeff&apos;s Radius Decks may contact me by email, phone, or text about
+              the Deck Rebuild Brief and my deck project. See the{" "}
+              <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">
+                privacy notice
+              </Link>
+              .
+            </span>
+          </label>
+          {error ? <p className="text-sm text-cedar">{error}</p> : null}
+          <Button type="submit" className="w-full" disabled={busy || !contactConsent}>
+            {busy ? "Saving your request…" : "Open the brief"}
           </Button>
           <p className="text-xs text-muted-foreground">
-            No newsletter sludge. Jeff uses this to call people who are actually
-            in the radius.
+            No newsletter sludge. Jeff uses this to call people who are actually in the radius.
           </p>
         </form>
       </main>
@@ -107,8 +127,8 @@ function Guide() {
       <p className="text-xs tracking-[0.18em] text-cedar uppercase">Unlocked · 2026</p>
       <h1 className="mt-3 font-display text-5xl">Deck Rebuild Brief for zip 30620.</h1>
       <p className="mt-4 text-lg text-muted-foreground">
-        Written for homeowners who can afford the right job and are tired of
-        bids that pretend lumber is free.
+        Written for homeowners who can afford the right job and are tired of bids that pretend
+        lumber is free.
       </p>
 
       <section className="mt-12">
@@ -121,8 +141,8 @@ function Guide() {
           <li>Stairs only: from $4,800</li>
         </ul>
         <p className="mt-4 text-sm text-muted-foreground">
-          Composite, cable, and roofs sit on top. They are not a substitute for
-          flashing and a rail a person can lean on.
+          Composite, cable, and roofs sit on top. They are not a substitute for flashing and a rail
+          a person can lean on.
         </p>
       </section>
 
@@ -141,10 +161,9 @@ function Guide() {
       <section className="mt-12">
         <h2 className="font-display text-3xl">Redeck vs replace</h2>
         <p className="mt-4">
-          Save the frame if posts, beams, and joists are still honest. Tear it
-          down if a screwdriver goes in without trying, if the rail posts are
-          toenailed into rotten rim, or if the last guy skipped flashing. Jeff
-          crawls it. You see the photos. You decide once.
+          Save the frame if posts, beams, and joists are still honest. Tear it down if a screwdriver
+          goes in without trying, if the rail posts are toenailed into rotten rim, or if the last
+          guy skipped flashing. Jeff crawls it. You see the photos. You decide once.
         </p>
       </section>
 
@@ -158,9 +177,9 @@ function Guide() {
       <section className="mt-12 rounded-xl bg-ink p-8 text-paper">
         <h2 className="font-display text-3xl text-paper">The brief is not the job.</h2>
         <p className="mt-3 text-paper/75">
-          Fall still has dry weeks. Hold a measure slot while the crew has them.
-          If you are not the owner, or the budget cannot touch $8,500 for a
-          redeck, keep the brief and wait until both of those are true.
+          Fall still has dry weeks. Hold a measure slot while the crew has them. If you are not the
+          owner, or the budget cannot touch $8,500 for a redeck, keep the brief and wait until both
+          of those are true.
         </p>
         <Button asChild className="mt-6">
           <Link to="/quote">Get my crew brief + hold a slot</Link>

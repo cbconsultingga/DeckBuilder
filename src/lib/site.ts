@@ -9,11 +9,6 @@ export const SITE = {
   radiusMiles: 25,
   years: 12,
   crew: "Jeff plus a four-person crew",
-  emailDefault: "",
-  phoneDefault: "",
-  thumbtackDefault: "https://www.thumbtack.com",
-  facebookDefault: "https://www.facebook.com",
-  instagramDefault: "https://www.instagram.com",
 } as const;
 
 export const SERVICE_CITIES = [

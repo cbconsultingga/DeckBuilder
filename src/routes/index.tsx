@@ -10,14 +10,8 @@ import {
 } from "@/components/ui/accordion";
 import { BeforeAfter, PhotoCarousel } from "@/components/media";
 import { QuoteFunnel } from "@/components/funnel";
-import {
-  FAQS,
-  PROOF_STATS,
-  SERVICES,
-  SITE,
-  TESTIMONIALS,
-  slotsThisWindow,
-} from "@/lib/site";
+import { PUBLIC_BUSINESS_FEATURES } from "@/lib/business";
+import { FAQS, PROOF_STATS, SERVICES, SITE, TESTIMONIALS, slotsThisWindow } from "@/lib/site";
 import { BEFORE_AFTER, PHOTOS } from "@/lib/gallery";
 import { livePosts } from "@/lib/posts";
 
@@ -62,10 +56,9 @@ function Home() {
             The last deck you pay for.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-paper/80 sm:text-lg">
-            Jeff builds the radius work most crews will not touch. Right now the
-            calendar is open for fast redecks and clean pressure-treated builds —
-            so you have a finished, insured deck under your feet before the next
-            Georgia storm.
+            Jeff builds the radius work most crews will not touch. Right now the calendar is open
+            for fast redecks and clean pressure-treated builds — so you have a finished, insured
+            deck under your feet before the next Georgia storm.
           </p>
           <p className="mt-4 text-sm text-paper/60">{hero.caption}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -75,13 +68,17 @@ function Home() {
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
-            <Button asChild size="xl" variant="outline" className="bg-paper/10 text-paper hover:bg-paper/20">
+            <Button
+              asChild
+              size="xl"
+              variant="outline"
+              className="bg-paper/10 text-paper hover:bg-paper/20"
+            >
               <Link to="/work">See the transformations</Link>
             </Button>
           </div>
           <p className="mt-5 text-sm text-paper/55">
-            {slots} measure slots left in this fall window. Homeowners only.
-            Decision on the visit.
+            {slots} measure slots left in this fall window. Homeowners only. Decision on the visit.
           </p>
         </div>
       </section>
@@ -101,13 +98,15 @@ function Home() {
 
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="max-w-2xl">
-          <p className="text-xs tracking-[0.18em] text-cedar uppercase">How we make money for you</p>
+          <p className="text-xs tracking-[0.18em] text-cedar uppercase">
+            How we make money for you
+          </p>
           <h2 className="mt-3 font-display text-4xl sm:text-5xl">
             Fast jobs first. Custom when the house asks.
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Radius is the craft. Redecks are the machine. You get the same crew
-            either way — and you do not get a six-month maybe.
+            Radius is the craft. Redecks are the machine. You get the same crew either way — and you
+            do not get a six-month maybe.
           </p>
         </div>
         <div className="mt-12 grid gap-4 md:grid-cols-2">
@@ -168,27 +167,32 @@ function Home() {
         <PhotoCarousel photos={carousel.slice(0, 8)} />
       </section>
 
-      <section className="border-y border-border bg-card py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <p className="text-xs tracking-[0.18em] text-cedar uppercase">Neighbors, not actors</p>
-          <h2 className="mt-3 max-w-xl font-display text-4xl sm:text-5xl">
-            People who already spent the money — and would again.
-          </h2>
-          <div className="mt-12 grid gap-4 md:grid-cols-2">
-            {TESTIMONIALS.map((t) => (
-              <blockquote key={t.name} className="rounded-xl bg-background p-6 shadow-border sm:p-8">
-                <p className="font-display text-xl leading-snug sm:text-2xl">“{t.quote}”</p>
-                <footer className="mt-6 text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">{t.name}</span>
-                  {" · "}
-                  {t.city}
-                  <span className="mt-1 block text-xs tracking-wide uppercase">{t.job}</span>
-                </footer>
-              </blockquote>
-            ))}
+      {PUBLIC_BUSINESS_FEATURES.showTestimonials ? (
+        <section className="border-y border-border bg-card py-20">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <p className="text-xs tracking-[0.18em] text-cedar uppercase">Neighbors, not actors</p>
+            <h2 className="mt-3 max-w-xl font-display text-4xl sm:text-5xl">
+              People who already spent the money — and would again.
+            </h2>
+            <div className="mt-12 grid gap-4 md:grid-cols-2">
+              {TESTIMONIALS.map((t) => (
+                <blockquote
+                  key={t.name}
+                  className="rounded-xl bg-background p-6 shadow-border sm:p-8"
+                >
+                  <p className="font-display text-xl leading-snug sm:text-2xl">“{t.quote}”</p>
+                  <footer className="mt-6 text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">{t.name}</span>
+                    {" · "}
+                    {t.city}
+                    <span className="mt-1 block text-xs tracking-wide uppercase">{t.job}</span>
+                  </footer>
+                </blockquote>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       <section className="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2">
         <div>
@@ -197,9 +201,8 @@ function Home() {
             The 2026 Deck Rebuild Brief for 30620.
           </h2>
           <p className="mt-4 text-muted-foreground">
-            What homeowners in Bethlehem and 25 miles actually pay. The three
-            questions that kill a bad bid. When a redeck is enough — and when
-            you are burning money on stain.
+            What homeowners in Bethlehem and 25 miles actually pay. The three questions that kill a
+            bad bid. When a redeck is enough — and when you are burning money on stain.
           </p>
           <ul className="mt-6 space-y-3 text-sm">
             <li className="flex gap-3">
@@ -272,9 +275,8 @@ function Home() {
           <div>
             <p className="font-display text-3xl sm:text-4xl">Ready this season, or not at all.</p>
             <p className="mt-2 max-w-xl text-sm text-primary-foreground/80">
-              If you need a committee, a miracle budget, or a maybe in March, we
-              are the wrong crew. If you own the house and want it used by the
-              holidays, hold a slot.
+              If you need a committee, a miracle budget, or a maybe in March, we are the wrong crew.
+              If you own the house and want it used by the holidays, hold a slot.
             </p>
           </div>
           <Button asChild size="xl" variant="secondary">

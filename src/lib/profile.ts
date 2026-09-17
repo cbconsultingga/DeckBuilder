@@ -1,4 +1,4 @@
-import { SITE } from "./site";
+import { PUBLIC_BUSINESS_PROFILE } from "./business";
 
 const KEY = "jrd-owner-profile";
 
@@ -13,13 +13,7 @@ export type OwnerProfile = {
 };
 
 export const DEFAULT_PROFILE: OwnerProfile = {
-  phone: SITE.phoneDefault,
-  email: SITE.emailDefault,
-  thumbtack: SITE.thumbtackDefault,
-  facebook: SITE.facebookDefault,
-  instagram: SITE.instagramDefault,
-  gbp: "",
-  calendar: "",
+  ...PUBLIC_BUSINESS_PROFILE,
 };
 
 export function readProfile(): OwnerProfile {

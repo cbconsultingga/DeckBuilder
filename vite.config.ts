@@ -150,6 +150,9 @@ export default defineConfig(({ command, isPreview }) => ({
     host: "0.0.0.0",
     port: 8080,
     strictPort: true,
+    // Permit Manus's HTTPS preview proxy without opening the dev server to
+    // arbitrary Host headers. Vite treats a leading dot as a subdomain match.
+    allowedHosts: [".manus.computer"],
   },
   preview: {
     host: "127.0.0.1",
