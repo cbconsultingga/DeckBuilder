@@ -1,0 +1,116 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Sora", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: #f3ebe0;
+  --color-foreground: #1b1511;
+  --color-card: #faf6f0;
+  --color-card-foreground: #1b1511;
+  --color-muted: #e7dcce;
+  --color-muted-foreground: #6b5e52;
+  --color-primary: #8f3a1e;
+  --color-primary-foreground: #fbf6ef;
+  --color-secondary: #24352c;
+  --color-secondary-foreground: #f6f0e8;
+  --color-accent: #24352c;
+  --color-accent-foreground: #f6f0e8;
+  --color-destructive: #8f2a1e;
+  --color-destructive-foreground: #fbf6ef;
+  --color-border: #d4c4b0;
+  --color-input: #d4c4b0;
+  --color-ring: #8f3a1e;
+  --color-ink: #14110e;
+  --color-paper: #f3ebe0;
+  --color-cedar: #8f3a1e;
+  --color-forest: #24352c;
+  --color-iron: #2a2622;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius: 12px;
+
+  --shadow-border:
+    0px 0px 0px 1px rgba(27, 21, 17, 0.06),
+    0px 1px 2px -1px rgba(27, 21, 17, 0.06),
+    0px 2px 4px 0px rgba(27, 21, 17, 0.04);
+  --shadow-border-hover:
+    0px 0px 0px 1px rgba(27, 21, 17, 0.1),
+    0px 8px 24px -12px rgba(27, 21, 17, 0.18);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    line-height: 1.55;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    letter-spacing: -0.03em;
+    line-height: 1.12;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-cedar) 28%, transparent);
+    color: var(--color-ink);
+  }
+
+  img.media {
+    outline: 1px solid rgba(27, 21, 17, 0.12);
+    outline-offset: -1px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.shadow-border {
+  box-shadow: var(--shadow-border);
+}
+
+.shadow-border-hover {
+  box-shadow: var(--shadow-border-hover);
+}
