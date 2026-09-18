@@ -1,13 +1,9 @@
-import {
-  createRootRoute,
-  HeadContent,
-  Outlet,
-  Scripts,
-} from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { JsonLd, Shell } from "@/components/layout";
+import { AuthProvider } from "@/lib/auth/provider";
 import { SITE } from "@/lib/site";
 import appCss from "../styles.css?url";
 

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as PlaybookRouteImport } from './routes/playbook'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QuoteRouteImport } from './routes/quote'
 import { Route as WorkRouteImport } from './routes/work'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
@@ -30,6 +31,11 @@ const GuideRoute = GuideRouteImport.update({
 const PlaybookRoute = PlaybookRouteImport.update({
   id: '/playbook',
   path: '/playbook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuoteRoute = QuoteRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/guide': typeof GuideRoute
   '/playbook': typeof PlaybookRoute
+  '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
   '/work': typeof WorkRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/guide': typeof GuideRoute
   '/playbook': typeof PlaybookRoute
+  '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
   '/work': typeof WorkRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/guide': typeof GuideRoute
   '/playbook': typeof PlaybookRoute
+  '/privacy': typeof PrivacyRoute
   '/quote': typeof QuoteRoute
   '/work': typeof WorkRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -84,15 +93,30 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/guide' | '/playbook' | '/quote' | '/work' | '/blog/$slug' | '/blog/'
+    | '/'
+    | '/guide'
+    | '/playbook'
+    | '/privacy'
+    | '/quote'
+    | '/work'
+    | '/blog/$slug'
+    | '/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/guide' | '/playbook' | '/quote' | '/work' | '/blog/$slug' | '/blog'
+    | '/'
+    | '/guide'
+    | '/playbook'
+    | '/privacy'
+    | '/quote'
+    | '/work'
+    | '/blog/$slug'
+    | '/blog'
   id:
     | '__root__'
     | '/'
     | '/guide'
     | '/playbook'
+    | '/privacy'
     | '/quote'
     | '/work'
     | '/blog/$slug'
@@ -103,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GuideRoute: typeof GuideRoute
   PlaybookRoute: typeof PlaybookRoute
+  PrivacyRoute: typeof PrivacyRoute
   QuoteRoute: typeof QuoteRoute
   WorkRoute: typeof WorkRoute
   BlogSlugRoute: typeof BlogSlugRoute
@@ -130,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/playbook'
       fullPath: '/playbook'
       preLoaderRoute: typeof PlaybookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quote': {
@@ -167,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GuideRoute: GuideRoute,
   PlaybookRoute: PlaybookRoute,
+  PrivacyRoute: PrivacyRoute,
   QuoteRoute: QuoteRoute,
   WorkRoute: WorkRoute,
   BlogSlugRoute: BlogSlugRoute,

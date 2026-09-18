@@ -3,9 +3,12 @@ import { useState } from "react";
 import { Check, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
+import { PUBLIC_BUSINESS_PROFILE } from "@/lib/business";
 import { requestEstimate } from "@/lib/estimate";
+import { captureLead, type LeadCaptureReceipt } from "@/lib/lead-capture";
+import { safePublicUrl } from "@/lib/lead-routing";
 import { isInServiceZip, slotsThisWindow } from "@/lib/site";
-import { magnetUnlocked, newId, saveLead, unlockMagnet, type Lead } from "@/lib/leads";
+import { unlockMagnet } from "@/lib/leads";
 import { cn } from "@/lib/utils";
 
 const JOBS = [
@@ -36,6 +39,7 @@ const SOURCES = ["Google", "Thumbtack", "Neighbor / referral", "Facebook", "Inst
 type Draft = {
   zip: string;
   homeowner: boolean | null;
+  contactConsent: boolean;
   jobType: string;
   size: string;
   height: string;
@@ -51,6 +55,7 @@ type Draft = {
 const empty: Draft = {
   zip: "",
   homeowner: null,
+  contactConsent: false,
   jobType: "",
   size: "",
   height: "",
@@ -88,7 +93,9 @@ function Choice({
     >
       <span className="block text-sm font-medium">{title}</span>
       {hint ? (
-        <span className={cn("mt-0.5 block text-xs", active ? "text-paper/70" : "text-muted-foreground")}>
+        <span
+          className={cn("mt-0.5 block text-xs", active ? "text-paper/70" : "text-muted-foreground")}
+        >
           {hint}
         </span>
       ) : null}
@@ -101,14 +108,10 @@ export function QuoteFunnel({ compact = false }: { compact?: boolean }) {
   const [draft, setDraft] = useState<Draft>(empty);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [receipt, setReceipt] = useState<LeadCaptureReceipt | null>(null);
   const [error, setError] = useState<string | null>(null);
   const slots = slotsThisWindow();
-
-  const qualified =
-    draft.homeowner === true &&
-    isInServiceZip(draft.zip) &&
-    draft.budget !== "Under $8,500" &&
-    draft.timeline !== "Just looking";
+  const bookingUrl = safePublicUrl(PUBLIC_BUSINESS_PROFILE.calendar);
 
   function patch(p: Partial<Draft>) {
     setDraft((d) => ({ ...d, ...p }));
@@ -131,54 +134,66 @@ export function QuoteFunnel({ compact = false }: { compact?: boolean }) {
           name: draft.name,
         },
       });
-      const lead: Lead = {
-        id: newId(),
-        createdAt: new Date().toISOString(),
-        name: draft.name,
-        email: draft.email,
-        phone: draft.phone,
-        zip: draft.zip,
-        homeowner: draft.homeowner === true,
-        jobType: draft.jobType,
-        size: draft.size,
-        height: draft.height,
-        budget: draft.budget,
-        timeline: draft.timeline,
-        source: draft.source,
-        notes: draft.notes,
-        qualified,
-        estimate: estimate.text,
-      };
-      saveLead(lead);
+      const captured = await captureLead({
+        data: {
+          kind: "quote",
+          name: draft.name,
+          email: draft.email,
+          phone: draft.phone,
+          zip: draft.zip,
+          homeowner: draft.homeowner === true,
+          contactConsent: draft.contactConsent,
+          jobType: draft.jobType,
+          size: draft.size,
+          height: draft.height,
+          budget: draft.budget,
+          timeline: draft.timeline,
+          source: draft.source,
+          notes: draft.notes,
+          estimate: estimate.text,
+        },
+      });
       unlockMagnet();
+      setReceipt(captured);
       setResult(estimate.text);
     } catch {
-      setError("Something snagged. Send it again — the crew still wants the job.");
+      setError("Something snagged. Please call the crew or try again in a moment.");
     } finally {
       setBusy(false);
     }
   }
 
   if (result) {
+    const readyToBook =
+      receipt?.qualification === "qualified" && receipt.bookingStatus === "ready" && bookingUrl;
     return (
       <div className="rounded-xl bg-card p-6 shadow-border sm:p-8">
         <p className="text-xs tracking-[0.18em] text-cedar uppercase">
-          {qualified ? "Qualified · measure next" : "Captured · we'll be honest"}
+          {receipt?.qualification === "qualified" ? "Qualified · measure next" : "Request received"}
         </p>
         <h3 className="mt-2 font-display text-3xl">Your crew brief</h3>
         <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
           {result}
         </p>
         <p className="mt-6 text-sm text-foreground">
-          {qualified
-            ? `Jeff's next open window has ${slots} measure slots. He calls ready homeowners the same day.`
-            : "If this is not a fit this season, you still have the brief. When you are the decision-maker with a real budget, come back — the calendar is built for that."}
+          {receipt?.qualification === "qualified"
+            ? receipt.durable
+              ? `Your request is in the crew queue. Jeff's next open window has ${slots} measure slots.`
+              : "Preview request captured. In production, ready homeowners are routed straight into the crew queue."
+            : "You still have the brief. If the job becomes a fit this season, send the details again and the crew will review it."}
         </p>
-        {magnetUnlocked() ? (
-          <Button asChild className="mt-6">
+        <div className="mt-6 flex flex-wrap gap-3">
+          {readyToBook ? (
+            <Button asChild>
+              <a href={bookingUrl} target="_blank" rel="noreferrer">
+                Choose a measure time
+              </a>
+            </Button>
+          ) : null}
+          <Button asChild variant={readyToBook ? "outline" : "default"}>
             <Link to="/guide">Open the 2026 Cost Brief</Link>
           </Button>
-        ) : null}
+        </div>
       </div>
     );
   }
@@ -209,12 +224,10 @@ export function QuoteFunnel({ compact = false }: { compact?: boolean }) {
 
       {step === 0 && (
         <fieldset className="space-y-5">
-          <legend className="font-display text-2xl sm:text-3xl">
-            Tell us the house is yours.
-          </legend>
+          <legend className="font-display text-2xl sm:text-3xl">Tell us the house is yours.</legend>
           <p className="text-sm text-muted-foreground">
-            We drive 25 miles from zip 30620. We work for the person who owns the
-            deed and can nod on the visit.
+            We drive 25 miles from zip 30620. We work for the person who owns the deed and can nod
+            on the visit.
           </p>
           <div className="space-y-2">
             <Label htmlFor="zip">Zip code</Label>
@@ -253,9 +266,7 @@ export function QuoteFunnel({ compact = false }: { compact?: boolean }) {
 
       {step === 1 && (
         <fieldset className="space-y-5">
-          <legend className="font-display text-2xl sm:text-3xl">
-            What needs to happen.
-          </legend>
+          <legend className="font-display text-2xl sm:text-3xl">What needs to happen.</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             {JOBS.map((j) => (
               <Choice
@@ -273,15 +284,27 @@ export function QuoteFunnel({ compact = false }: { compact?: boolean }) {
       {step === 2 && (
         <fieldset className="space-y-5">
           <legend className="font-display text-2xl sm:text-3xl">Size and height.</legend>
-          <p className="text-sm text-muted-foreground">Close enough is fine. The tape finishes it.</p>
+          <p className="text-sm text-muted-foreground">
+            Close enough is fine. The tape finishes it.
+          </p>
           <div className="grid grid-cols-2 gap-3">
             {SIZES.map((s) => (
-              <Choice key={s} active={draft.size === s} onClick={() => patch({ size: s })} title={s} />
+              <Choice
+                key={s}
+                active={draft.size === s}
+                onClick={() => patch({ size: s })}
+                title={s}
+              />
             ))}
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             {HEIGHTS.map((s) => (
-              <Choice key={s} active={draft.height === s} onClick={() => patch({ height: s })} title={s} />
+              <Choice
+                key={s}
+                active={draft.height === s}
+                onClick={() => patch({ height: s })}
+                title={s}
+              />
             ))}
           </div>
         </fieldset>
@@ -293,8 +316,8 @@ export function QuoteFunnel({ compact = false }: { compact?: boolean }) {
             Budget and speed. Be adult about it.
           </legend>
           <p className="text-sm text-muted-foreground">
-            Most redecks here start around $8,500. New builds from $18,000. A
-            number under that is a repair, not a rebuild.
+            Most redecks here start around $8,500. New builds from $18,000. A number under that is a
+            repair, not a rebuild.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             {BUDGETS.map((b) => (
@@ -387,6 +410,23 @@ export function QuoteFunnel({ compact = false }: { compact?: boolean }) {
                 onChange={(e) => patch({ notes: e.target.value })}
               />
             </div>
+            <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-muted-foreground sm:col-span-2">
+              <input
+                type="checkbox"
+                checked={draft.contactConsent}
+                onChange={(event) => patch({ contactConsent: event.target.checked })}
+                className="mt-1 size-4 shrink-0 accent-cedar"
+                required
+              />
+              <span>
+                I agree that Jeff&apos;s Radius Decks may contact me by phone, email, or text about
+                this request. See the{" "}
+                <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">
+                  privacy notice
+                </Link>
+                .
+              </span>
+            </label>
           </div>
         </fieldset>
       )}
@@ -409,7 +449,7 @@ export function QuoteFunnel({ compact = false }: { compact?: boolean }) {
             (step === 1 && !draft.jobType) ||
             (step === 2 && (!draft.size || !draft.height)) ||
             (step === 3 && (!draft.budget || !draft.timeline)) ||
-            (step === 4 && (!draft.name || !draft.phone || !draft.email))
+            (step === 4 && (!draft.name || !draft.phone || !draft.email || !draft.contactConsent))
           }
         >
           {busy ? (

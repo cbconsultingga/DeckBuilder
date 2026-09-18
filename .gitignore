@@ -3,3 +3,8 @@ node_modules/
 .github_repo
 .env
 .env.*
+.vercel/
+.grok/preview.log
+.grok/preview.pid
+.grok/qa-validation-*.md
+.grok/phase34-browser-qa.md

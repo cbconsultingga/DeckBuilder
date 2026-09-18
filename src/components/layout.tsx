@@ -3,8 +3,9 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, Phone, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useOwner } from "@/hooks/use-owner";
 import { NAV, SITE, slotsThisWindow } from "@/lib/site";
-import { formatPhone, readProfile, type OwnerProfile } from "@/lib/profile";
+import { formatPhone } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
 function LogoMark({ className }: { className?: string }) {
@@ -21,17 +22,6 @@ function LogoMark({ className }: { className?: string }) {
       <path d="M16 8v14" stroke="white" strokeWidth="2.2" strokeLinecap="round" />
     </svg>
   );
-}
-
-export function useOwner() {
-  const [profile, setProfile] = useState<OwnerProfile | null>(null);
-  useEffect(() => {
-    setProfile(readProfile());
-    const on = () => setProfile(readProfile());
-    window.addEventListener("jrd-profile", on);
-    return () => window.removeEventListener("jrd-profile", on);
-  }, []);
-  return profile;
 }
 
 export function SiteHeader() {
@@ -53,9 +43,7 @@ export function SiteHeader() {
         <Link to="/" className="flex items-center gap-2.5">
           <LogoMark />
           <span className="leading-tight">
-            <span className="block font-display text-lg tracking-tight">
-              Jeff's Radius
-            </span>
+            <span className="block font-display text-lg tracking-tight">Jeff's Radius</span>
             <span
               className={cn(
                 "block text-[0.65rem] tracking-[0.18em] uppercase",
@@ -155,9 +143,8 @@ export function SiteFooter() {
             <span className="font-display text-2xl">Jeff's Radius Decks</span>
           </div>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-paper/70">
-            Custom radius and fast redecks for homeowners in Bethlehem, Georgia
-            and 25 miles of zip 30620. Twelve years. A crew that shows up. A
-            number that does not move.
+            Custom radius and fast redecks for homeowners in Bethlehem, Georgia and 25 miles of zip
+            30620. Twelve years. A crew that shows up. A number that does not move.
           </p>
         </div>
         <div>
@@ -215,9 +202,14 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-paper/10">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-4 text-xs text-paper/40 sm:flex-row sm:justify-between sm:px-6">
-          <span>© {new Date().getFullYear()} {SITE.name}. All rights reserved.</span>
+          <span>
+            © {new Date().getFullYear()} {SITE.name}. All rights reserved.
+          </span>
           <Link to="/playbook" className="hover:text-paper/70">
             Operations playbook
+          </Link>
+          <Link to="/privacy" className="hover:text-paper/70">
+            Privacy
           </Link>
         </div>
       </div>
@@ -261,12 +253,10 @@ export function MagnetBanner() {
       >
         <X className="size-4" />
       </button>
-      <p className="pr-6 font-display text-xl text-paper">
-        The 2026 Deck Rebuild Brief
-      </p>
+      <p className="pr-6 font-display text-xl text-paper">The 2026 Deck Rebuild Brief</p>
       <p className="mt-2 text-sm text-paper/70">
-        What Barrow County homeowners actually pay for a redeck, a new build, and
-        a radius — and the three questions that kill a bad bid.
+        What Barrow County homeowners actually pay for a redeck, a new build, and a radius — and the
+        three questions that kill a bad bid.
       </p>
       <Button asChild variant="default" className="mt-4 w-full">
         <Link to="/guide">Send me the brief</Link>
@@ -294,10 +284,7 @@ export function JsonLd() {
     image: "/gallery/complete-radius.jpg",
   };
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   );
 }
 
